@@ -1,95 +1,109 @@
-import Image from 'next/image'
-import styles from './page.module.css'
+"use client";
+import styles from "./page.module.css";
+import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
+import { Input } from "@/components/input/input";
+import { ImageItem } from "@/components/image-item/image-item";
+import { useState } from "react";
+import { useSession } from "next-auth/react";
+import { redirect } from "next/navigation";
+
+const swapElements = (_array, index1, index2) => {
+  const array = [..._array];
+  if (
+    index1 < 0 ||
+    index1 >= array.length ||
+    index2 < 0 ||
+    index2 >= array.length
+  ) {
+    return array; // Indices out of bounds, return the original array
+  }
+
+  // Swap the elements at the specified indices
+  const temp = array[index1];
+  array[index1] = array[index2];
+  array[index2] = temp;
+
+  return array;
+};
+
+const captions = [
+  "Lorem ipsum dolor sit amet consectetur adipisicing elit.",
+  "Enim neque veritatis mollitia in ipsum reprehenderit,",
+  "quisquam rem,",
+  "voluptates qui numquam ratione modi maxime cupiditate aspernatur voluptatem dolor tempora nulla ducimus.",
+  "Perferendis impedit hic accusantium est repudiandae.",
+  "Impedit quod,",
+  "aliquid earum eius minus blanditiis.",
+  "Laboriosam quas eligendi fugit saepe voluptas quisquam.",
+  "Necessitatibus autem sit animi repellendus",
+  "libero molestiae veritatis molestias distinctio mollitia hic veniam,",
+  "adipisci at cupiditate asperiores ratione sed laboriosam atque cum fuga?",
+  "Necessitatibus, animi? Laborum eum quam quaerat, nostrum officia facere",
+  "illo! Ullam inventore saepe temporibus, expedita cumque corrupti, culpa,",
+  "modi nemo cum quo tenetur alias pariatur vitae quidem!",
+  "consequuntur? Maiores nesciunt porro iste molestiae. Neque dicta eius",
+  "quae numquam maxime ex, fugiat velit nisi autem laudantium beatae vel",
+  "beatae maxime dolore distinctio laborum voluptatem doloribus odit",
+  "veniam saepe molestias! Ipsam quod praesentium animi libero. Rerum ea",
+  "aliquam mollitia vero consectetur repudiandae pariatur laboriosam quos",
+  "assumenda obcaecati, repellendus laudantium. Cupiditate, nesciunt? Sed",
+];
 
 export default function Home() {
+  const [search, setSearch] = useState("");
+  const [images, setImages] = useState(
+    captions.map((caption) => {
+      const height = Math.floor(Math.random() * (800 - 400 + 1)) + 400;
+
+      return {
+        src: `https://picsum.photos/500/${height}`,
+        height,
+        caption,
+      };
+    })
+  );
+  const { data: session } = useSession();
+
+  if (session === null) {
+    return redirect("/signin");
+  }
+
   return (
     <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.js</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+      <div className={styles.container}>
+        <Input
+          type="search"
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Enter your search query"
+        />
+
+        <div style={{ marginTop: "1.5rem" }}>
+          <ResponsiveMasonry
+            columnsCountBreakPoints={{ 350: 1, 750: 2, 900: 4 }}
           >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+            <Masonry>
+              {images
+                .filter(
+                  (image) =>
+                    !search ||
+                    image.caption.toLowerCase().includes(search.toLowerCase())
+                )
+                .map((image, i) => {
+                  return (
+                    <ImageItem
+                      key={i}
+                      image={image}
+                      position={i}
+                      swap={([index1, index2]) =>
+                        setImages(swapElements(images, index1, index2))
+                      }
+                    />
+                  );
+                })}
+            </Masonry>
+          </ResponsiveMasonry>
         </div>
       </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
     </main>
-  )
+  );
 }
