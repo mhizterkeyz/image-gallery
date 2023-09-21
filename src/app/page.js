@@ -68,6 +68,10 @@ export default function Home() {
     return redirect("/signin");
   }
 
+  if (!session) {
+    return null;
+  }
+
   return (
     <main className={styles.main}>
       <div className={styles.container}>
