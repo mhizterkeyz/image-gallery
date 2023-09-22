@@ -2,9 +2,12 @@
   position: relative;
   cursor: pointer;
   overflow: hidden;
+  transform: scale(1);
+  transition: transform 0.2s ease-in-out;
 }
 
 .item .caption {
+  z-index: 99;
   position: absolute;
   bottom: 0;
   left: 0;
@@ -15,11 +18,9 @@
   background: rgba(0, 0, 0, 0.5);
   padding: 10px;
   width: 100%;
-
-  transform: translateY(100%);
-  transition: transform 0.2s ease-in-out;
 }
 
-.item:hover .caption {
-  transform: translateY(0);
+.item:hover {
+  transform: scale(1.05);
+  z-index: 999;
 }

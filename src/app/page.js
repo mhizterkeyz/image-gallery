@@ -3,8 +3,8 @@ import styles from "./page.module.css";
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
 import { Input } from "@/components/input/input";
 import { ImageItem } from "@/components/image-item/image-item";
-import { useState } from "react";
-import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
+import { signOut, useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 
 const swapElements = (_array, index1, index2) => {
@@ -51,18 +51,97 @@ const captions = [
 
 export default function Home() {
   const [search, setSearch] = useState("");
-  const [images, setImages] = useState(
-    captions.map((caption) => {
-      const height = Math.floor(Math.random() * (800 - 400 + 1)) + 400;
+  const [images, setImages] = useState([
+    {
+      src: "./images/Men.jpeg",
+      tag: "men's shirt",
+    },
+    {
+      src: "./images/quote.jpeg",
+      tag: "quote",
+    },
 
-      return {
-        src: `https://picsum.photos/500/${height}`,
-        height,
-        caption,
-      };
-    })
-  );
+    {
+      src: "./images/Outfits_.jpeg",
+      tag: "style",
+    },
+
+    {
+      src: "./images/reality.jpeg",
+      tag: "Reality",
+    },
+
+    {
+      src: "./images/bob.jpeg",
+      tag: "Bob's fashion",
+    },
+    {
+      src: "./images/gift.jpeg",
+      tag: "dark cars",
+    },
+    {
+      src: "./images/benz.jpeg",
+      tag: "Benz",
+    },
+    {
+      src: "./images/art.png",
+      tag: "Art",
+    },
+    {
+      src: "./images/animals.jpeg",
+      tag: "Cub",
+    },
+    {
+      src: "./images/Essence.jpeg",
+      tag: "Unique fashion",
+    },
+    {
+      src: "./images/Collection.png",
+      tag: "#",
+    },
+    {
+      src: "./images/teeth.png",
+      tag: "Teeth",
+    },
+    {
+      src: "./images/vintage.jpeg",
+      tag: "Vintage Car",
+    },
+    {
+      src: "./images/Week.png",
+      tag: "£",
+    },
+    {
+      src: "./images/Ride.jpeg",
+      tag: "Rides",
+    },
+    {
+      src: "./images/skin.jpeg",
+      tag: "&",
+    },
+    {
+      src: "./images/sydney.jpeg",
+      tag: "vis-a-vis",
+    },
+  ]);
+  const [searchResult, setSearchResult] = useState([]);
   const { data: session } = useSession();
+
+  useEffect(() => {
+    if (!search) {
+      setSearchResult([]);
+    } else {
+      setSearchResult(images.filter((image) => image.tag.includes(search)));
+    }
+  }, [search, images]);
+
+  const swap = ([index1, index2]) => {
+    if (searchResult.length) {
+      setSearchResult(swapElements(searchResult, index1, index2));
+    } else {
+      setImages(swapElements(images, index1, index2));
+    }
+  };
 
   if (session === null) {
     return redirect("/signin");
@@ -72,38 +151,40 @@ export default function Home() {
     return null;
   }
 
+  const toDisplay = searchResult.length ? searchResult : images;
+
   return (
     <main className={styles.main}>
       <div className={styles.container}>
-        <Input
-          type="search"
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Enter your search query"
-        />
+        <div style={{ display: "flex", gap: "10px" }}>
+          <div style={{ flexGrow: "1" }}>
+            <Input
+              type="search"
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Enter your search query"
+            />
+          </div>
+
+          <div style={{ marginLeft: "auto" }}>
+            <button
+              style={{ height: "100%", display: "block", padding: "0 6px" }}
+              onClick={() => signOut({ redirect: false, callbackUrl: "/" })}
+            >
+              Logout
+            </button>
+          </div>
+        </div>
 
         <div style={{ marginTop: "1.5rem" }}>
           <ResponsiveMasonry
             columnsCountBreakPoints={{ 350: 1, 750: 2, 900: 4 }}
           >
             <Masonry>
-              {images
-                .filter(
-                  (image) =>
-                    !search ||
-                    image.caption.toLowerCase().includes(search.toLowerCase())
-                )
-                .map((image, i) => {
-                  return (
-                    <ImageItem
-                      key={i}
-                      image={image}
-                      position={i}
-                      swap={([index1, index2]) =>
-                        setImages(swapElements(images, index1, index2))
-                      }
-                    />
-                  );
-                })}
+              {toDisplay.map((image, i) => {
+                return (
+                  <ImageItem key={i} image={image} position={i} swap={swap} />
+                );
+              })}
             </Masonry>
           </ResponsiveMasonry>
         </div>
